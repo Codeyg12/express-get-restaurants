@@ -1,9 +1,21 @@
-const express = require("express")
-const Restaurant = require("../models/Restaurant")
+const express = require("express");
+const { Restaurant, Menu, Item } = require("../models");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const restaurants = await Restaurant.findAll();
+  const restaurants = await Restaurant.findAll({
+    include: Menu,
+    include: [
+      {
+        model: Menu,
+        include: [
+          {
+            model: Item,
+          },
+        ],
+      },
+    ],
+  });
   res.json(restaurants);
 });
 
@@ -14,14 +26,14 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const newRestaurant = await Restaurant.create(req.body);
-  res.send(newRestaurant);
+  await Restaurant.create(req.body);
+  const restaurants = await Restaurant.findAll();
+  res.send(restaurants);
 });
 
 router.put("/:id", async (req, res) => {
   const updatedRestaurant = await Restaurant.findByPk(req.params.id);
   await updatedRestaurant.update(req.body);
-  await updatedRestaurant.save();
   res.send(updatedRestaurant);
 });
 
