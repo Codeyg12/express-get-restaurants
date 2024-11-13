@@ -1,9 +1,21 @@
 const express = require("express");
-const Restaurant = require("../models/Restaurant");
+const { Restaurant, Menu, Item } = require("../models");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const restaurants = await Restaurant.findAll();
+  const restaurants = await Restaurant.findAll({
+    include: Menu,
+    include: [
+      {
+        model: Menu,
+        include: [
+          {
+            model: Item,
+          },
+        ],
+      },
+    ],
+  });
   res.json(restaurants);
 });
 
