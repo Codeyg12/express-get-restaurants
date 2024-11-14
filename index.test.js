@@ -40,27 +40,54 @@ describe("Method testing", () => {
     });
   });
 
-  test("POST can create a new Restaurant", async () => {
-    const response = await request(app).post("/restaurants").send({
-      name: "In'N'Out",
-      location: "San Clemente",
-      cuisine: "Fast Food",
+  describe("POST", () => {
+    test("POST can create a new Restaurant", async () => {
+      const response = await request(app).post("/restaurants").send({
+        name: "In'N'Out Burgers",
+        location: "San Clemente",
+        cuisine: "Fast Food",
+      });
+      expect(JSON.parse(response.text)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: "In'N'Out Burgers",
+            location: "San Clemente",
+            cuisine: "Fast Food",
+          }),
+        ])
+      );
     });
-    expect(JSON.parse(response.text)).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          name: "In'N'Out",
-          location: "San Clemente",
-          cuisine: "Fast Food",
-        }),
-      ])
-    );
+
+    test("throw error if fields aren't filled in", async () => {
+      const response = await request(app).post("/restaurants").send({
+        name: "La Tortilla Burritos",
+        location: "San Clemente",
+        cuisine: "",
+      });
+      expect(JSON.parse(response.text).error).toHaveLength(1);
+    });
+
+    test("throw error if name is too short or too long", async () => {
+      const shortResponse = await request(app).post("/restaurants").send({
+        name: "",
+        location: "San Clemente",
+        cuisine: "French",
+      });
+      const longResponse = await request(app).post("/restaurants").send({
+        name: "This is a way too long restaurant name so it won't be accepted due to it's length",
+        location: "San Clemente",
+        cuisine: "French",
+      });
+
+      expect(JSON.parse(shortResponse.text).error).toHaveLength(2);
+      expect(JSON.parse(longResponse.text).error).toHaveLength(1);
+    });
   });
 
   test("PUT can update an exisiting Restaurant", async () => {
     const response = await request(app)
       .put("/restaurants/1")
-      .send({ name: "AppleBee" });
+      .send({ name: "AppleBee", location: "Texas", cuisine: "FastFood" });
     expect(JSON.parse(response.text).name).toEqual("AppleBee");
   });
 
