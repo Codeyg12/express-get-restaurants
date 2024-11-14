@@ -40,27 +40,38 @@ describe("Method testing", () => {
     });
   });
 
-  test("POST can create a new Restaurant", async () => {
-    const response = await request(app).post("/restaurants").send({
-      name: "In'N'Out",
-      location: "San Clemente",
-      cuisine: "Fast Food",
+  describe("POST", () => {
+    test("POST can create a new Restaurant", async () => {
+      const response = await request(app).post("/restaurants").send({
+        name: "In'N'Out",
+        location: "San Clemente",
+        cuisine: "Fast Food",
+      });
+      expect(JSON.parse(response.text)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: "In'N'Out",
+            location: "San Clemente",
+            cuisine: "Fast Food",
+          }),
+        ])
+      );
     });
-    expect(JSON.parse(response.text)).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          name: "In'N'Out",
-          location: "San Clemente",
-          cuisine: "Fast Food",
-        }),
-      ])
-    );
+
+    test("throw error with name", async () => {
+      const response = await request(app).post("/restaurants").send({
+        name: "",
+        location: "San Clemente",
+        cuisine: "",
+      });
+      expect(JSON.parse(response.text).error).toHaveLength(2);
+    });
   });
 
   test("PUT can update an exisiting Restaurant", async () => {
     const response = await request(app)
       .put("/restaurants/1")
-      .send({ name: "AppleBee" });
+      .send({ name: "AppleBee", location: "Texas", cuisine: "FastFood" });
     expect(JSON.parse(response.text).name).toEqual("AppleBee");
   });
 
