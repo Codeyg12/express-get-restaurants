@@ -29,7 +29,7 @@ router.get("/:id", async (req, res) => {
 router.post(
   "/",
   [
-    check("name").notEmpty().trim(),
+    check("name").notEmpty().trim().isLength({ min: 10, max: 30 }),
     check("location").notEmpty().trim(),
     check("cuisine").notEmpty().trim(),
   ],
